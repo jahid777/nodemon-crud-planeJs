@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>hello mom look at , im using nodemon</h1>
+    <!-- addProduct ta client connetion a nie kaj korabo -->
+    <form action="/addProduct" method="post">
+      <input type="text" name="name" placeholder="type name">
+      <input type="text" name="price" placeholder="type price">
+      <input type="text" name="quantity" placeholder="type quantity">
+      <button type="submit">submit</button>
+    </form>
+
+      <div id="products">
+      </div>
+      <div id="update">
+      </div>
+    <script>
+      //data update korer jonno ay method
+      function loadProduct(id){
+        fetch(`product/${id}`)
+        .then(res => res.json())
+        .then(data => {
+           const update = document.getElementById('update');
+           update.innerHTML = `
+           <h3> update: ${data._id} </h3>
+           price:<input type="text"  value=${data.price} id="price"> 
+           <br/>
+           price:<input type="text"  value=${data.quantity} id="quantity"> 
+           <br/>
+           <button onclick="updateProduct('${data._id}')"> addProduct </button>
+           `;
+        })
+      }
+
+
+      function loadAllProducts(){
+        //product url router theke data ghula fetch kre amadr main site a dhekhbo
+      fetch('/products')
+      .then(res => res.json())
+      .then(products => {
+        console.log(products);
+        const container = document.getElementById('products');
+        container.innerHTML = ''; //update korle ager gula sore jabe
+         products.forEach(pd => {
+          
+          const p = document.createElement('p');
+          p.innerHTML = ` <strong> name: ${pd.name} </strong> -- price: ${pd.price} -- quantity: ${pd.quantity}
+          <button onclick="loadProduct('${pd._id}')">update</button>
+        <button onclick="deleteProduct(event, '${pd._id}')"> delete </button>
+          `; //event disi delet a chap dile jate jayga
+          container.appendChild(p)
+        });
+      })
+      }
+      loadAllProducts();
+
+
+      //update kora data database a pathate ay method
+      function updateProduct(id){
+        const price = document.getElementById('price').value //input ar id theke price 
+        const quantity = document.getElementById('quantity').value //input ar id theke quantity
+        const product = {id, price, quantity}
+        fetch(`/update/${id}`,{
+          method: 'PATCH',
+          headers:{'Content-Type': 'application/json'},
+          body: JSON.stringify(product)
+        })
+        .then(res => res.json())
+        .then(result => {
+          if(result){
+            loadAllProducts(); //update korle ui te jate load hoia dhaykay satethe sathee
+          }
+          // console.log(updated);
+        })
+      }
+
+      //data delect korer jonno ay niom
+      function deleteProduct(event,id){ //event for delt kole fakahoia jate jay
+        console.log(event.target);
+        fetch(`/delete/${id}`,{
+          method: 'DELETE'
+        })
+        .then(res => res.json())
+        .then(result => {
+          if(result){
+            event.target.parentNode.style.display = 'none';
+          }
+          // console.log('deleted successfully');
+
+        })
+      }
+        
+        
+    </script>
+</body>
+</html>
